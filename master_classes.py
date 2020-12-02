@@ -26,44 +26,39 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s'))
 
+ranks = [{'int': 1, 'rank': 'Minor', 'color': 'Blue'},
+         {'int': 2, 'rank': 'Major', 'color': 'Red'},
+         {'int': 3, 'rank': 'Spec Ops', 'color': 'Black'},
+         {'int': 4, 'rank': 'Stealth', 'color': 'Camouflage'},
+         {'int': 5, 'rank': 'Ultra', 'color': 'Silver'},
+         {'int': 6, 'rank': 'General', 'color': 'Gold'},
+         {'int': 7, 'rank': 'Honor Guard', 'color': 'Red and Gold'},
+         {'int': 8, 'rank': 'Honor Guard Ultra', 'color': 'Silver and Gold'}]
+
 
 class Rank:
     # Definition for Rank Master Class
     def __init__(self, rank):
-        self.rank = rank.title()
+        self._rank = rank.title()
+        try:
+            # get associated integer and aggression level for rank
+            self.rank_int = min([rank['int'] for rank in ranks if rank['rank'] == self._rank])
+            self.aggression_level = min([rank['int'] for rank in ranks if rank['rank'] == self._rank])
+        except (ValueError, KeyError):
+            logger.warning(f'Rank {self._rank} not available')
+            self.rank_int = 1
+            self.aggression_level = 1
 
-        # Determine armor color ad aggression level based on rank
-        if self.rank == 'Minor':
+        # Determine armor color
+        try:
+            self.armor_color = min([rank['color'] for rank in ranks if rank['rank'] == self._rank])
+        except (ValueError, KeyError):
+            logger.warning(f'Rank {self._rank} not available')
             self.armor_color = 'Blue'
-            self.aggression_level = 1
-        elif self.rank == 'Major':
-            self.armor_color = 'Red'
-            self.aggression_level = 2
-        elif self.rank == 'Spec Ops':
-            self.armor_color = 'Black'
-            self.aggression_level = 3
-        elif self.rank == 'Stealth':
-            self.armor_color = 'Camouflage'
-            self.aggression_level = 4
-        elif self.rank == 'Ultra':
-            self.armor_color = 'Silver'
-            self.aggression_level = 5
-        elif self.rank == 'General':
-            self.armor_color = 'Gold'
-            self.aggression_level = 6
-        elif self.rank == 'Honor Guard':
-            self.armor_color = 'Red and Gold'
-            self.aggression_level = 7
-        elif self.rank == 'Honor Guard Ultra':
-            self.armor_color = 'Silver and Gold'
-            self.aggression_level = 8
-        else:
-            self.armor_color = 'Blue'
-            self.aggression_level = 1
 
     # Define methods for returning Rank attributes
     def get_rank(self):
-        return self.rank
+        return self._rank
 
     def get_armor_color(self):
         return self.armor_color
@@ -71,10 +66,18 @@ class Rank:
     def get_aggression_level(self):
         return self.aggression_level
 
+    # Define other functions for class
+    def promote(self):
+        self.rank_int += 1
+
+    def demote(self):
+        self.rank_int -= 1
+
 
 class Enemy:
     # Definition for Enemy Master Class
     def __init__(self, name, rank, faction, health, has_shield, shield_strength, grenade_count=2, *weapons):
+        # Unpack arguments into member variables
         self.name = name.title()
         self.rank = rank.rank
         self.armor_color = rank.get_armor_color()
@@ -87,5 +90,7 @@ class Enemy:
         else:
             self.shield_strength = 0.0
         self.grenade_count = grenade_count
+        self.weapons = weapons
+
 
 
