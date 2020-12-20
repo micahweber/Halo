@@ -26,39 +26,51 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s'))
 
-ranks = [{'int': 1, 'rank': 'Minor', 'color': 'Blue'},
-         {'int': 2, 'rank': 'Major', 'color': 'Red'},
-         {'int': 3, 'rank': 'Spec Ops', 'color': 'Black'},
-         {'int': 4, 'rank': 'Stealth', 'color': 'Camouflage'},
-         {'int': 5, 'rank': 'Ultra', 'color': 'Silver'},
-         {'int': 6, 'rank': 'General', 'color': 'Gold'},
-         {'int': 7, 'rank': 'Honor Guard', 'color': 'Red and Gold'},
-         {'int': 8, 'rank': 'Honor Guard Ultra', 'color': 'Silver and Gold'}]
 
+class Rank(object):
+    ranks = [{'int': 1, 'title': 'Minor', 'color': 'Blue'},
+             {'int': 2, 'title': 'Major', 'color': 'Red'},
+             {'int': 3, 'title': 'Spec Ops', 'color': 'Black'},
+             {'int': 4, 'title': 'Stealth', 'color': 'Camouflage'},
+             {'int': 5, 'title': 'Ultra', 'color': 'Silver'},
+             {'int': 6, 'title': 'General', 'color': 'Gold'},
+             {'int': 7, 'title': 'Honor Guard', 'color': 'Red and Gold'},
+             {'int': 8, 'title': 'Honor Guard Ultra', 'color': 'Silver and Gold'}]
 
-class Rank:
     # Definition for Rank Master Class
     def __init__(self, rank):
         self._rank = rank.title()
         try:
             # get associated integer and aggression level for rank
-            self.rank_int = min([rank['int'] for rank in ranks if rank['rank'] == self._rank])
-            self.aggression_level = min([rank['int'] for rank in ranks if rank['rank'] == self._rank])
+            self._rank_int = min([rank['int'] for rank in Rank.ranks if rank['title'] == self._rank])
+            self.aggression_level = min([rank['int'] for rank in Rank.ranks if rank['title'] == self._rank])
         except (ValueError, KeyError):
             logger.warning(f'Rank {self._rank} not available')
-            self.rank_int = 1
+            self._rank_int = 1
             self.aggression_level = 1
 
         # Determine armor color
         try:
-            self.armor_color = min([rank['color'] for rank in ranks if rank['rank'] == self._rank])
+            self.armor_color = min([rank['color'] for rank in Rank.ranks if rank['title'] == self._rank])
         except (ValueError, KeyError):
             logger.warning(f'Rank {self._rank} not available')
             self.armor_color = 'Blue'
 
-    # Define methods for returning Rank attributes
-    def get_rank(self):
+    # Define @property and getter for rank
+    @property
+    def rank(self):
         return self._rank
+
+    # Define setter for rank
+    @rank.setter
+    def rank(self, new_rank):
+        # new_rank must be in Rank.ranks
+        is_valid = min([rank['title'] for rank in Rank.ranks if new_rank in rank.values()])
+        # if new_rank was in Rank.ranks, it is validd
+        if is_valid:
+            self._rank = new_rank
+        else:
+            self._rank = 1
 
     def get_armor_color(self):
         return self.armor_color
