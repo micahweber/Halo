@@ -38,39 +38,63 @@ class Rank(object):
              {'int': 8, 'title': 'Honor Guard Ultra', 'color': 'Silver and Gold'}]
 
     # Definition for Rank Master Class
-    def __init__(self, rank):
+    def __init__(self, rank='minor'):
         self._rank = rank.title()
         try:
             # get associated integer and aggression level for rank
             self._rank_int = min([rank['int'] for rank in Rank.ranks if rank['title'] == self._rank])
-            self.aggression_level = min([rank['int'] for rank in Rank.ranks if rank['title'] == self._rank])
+            self._aggression_level = min([rank['int'] for rank in Rank.ranks if rank['title'] == self._rank])
         except (ValueError, KeyError):
             logger.warning(f'Rank {self._rank} not available')
             self._rank_int = 1
-            self.aggression_level = 1
+            self._aggression_level = 1
 
         # Determine armor color
         try:
-            self.armor_color = min([rank['color'] for rank in Rank.ranks if rank['title'] == self._rank])
+            self._armor_color = min([rank['color'] for rank in Rank.ranks if rank['title'] == self._rank])
         except (ValueError, KeyError):
             logger.warning(f'Rank {self._rank} not available')
-            self.armor_color = 'Blue'
+            self._armor_color = 'Blue'
 
     # Define @property and getter for rank
     @property
     def rank(self):
+        print('Getting Rank')
         return self._rank
 
     # Define setter for rank
     @rank.setter
     def rank(self, new_rank):
+        print(f'Attempting to set rank to {new_rank}')
         # new_rank must be in Rank.ranks
         is_valid = min([rank['title'] for rank in Rank.ranks if new_rank in rank.values()])
-        # if new_rank was in Rank.ranks, it is validd
+        # if new_rank was in Rank.ranks, it is valid
         if is_valid:
             self._rank = new_rank
+            self._rank_int = min(rank['int'] for rank in Rank.ranks if new_rank == rank['title'])
         else:
-            self._rank = 1
+            self._rank = 'Minor'
+            self._rank_int = 1
+
+    # Define @property and getter for rank_int
+    @property
+    def rank_int(self):
+        print('Getting rank as integer')
+        return self._rank_int
+
+    # Define setter for rank_int
+    @rank_int.setter
+    def rank_int(self, new_rank_int):
+        print(f'Attempting to set rank_int to {new_rank_int}')
+        # new_rank_int must be in ranks
+        is_valid = min([rank['int'] for rank in Rank.ranks if new_rank_int in rank.values()])
+        # if new_rank_int is in Rank.ranks, it is valid
+        if is_valid:
+            self._rank_int = new_rank_int
+            self._rank = min(rank['title'] for rank in Rank.ranks if new_rank_int == rank['int'])
+        else:
+            self._rank_int = 1
+            self._rank = 'Minor'
 
     def get_armor_color(self):
         return self.armor_color
@@ -80,10 +104,16 @@ class Rank(object):
 
     # Define other functions for class
     def promote(self):
-        self.rank_int += 1
+        if self.rank_int < 8:
+            self.rank_int = self._rank_int + 1
+        else:
+            print('Maximum Rank has been reached')
 
     def demote(self):
-        self.rank_int -= 1
+        if self.rank_int > 1:
+            self.rank_int = self._rank_int - 1
+        else:
+            print('Minimum Rank has been reached')
 
 
 class Enemy:
